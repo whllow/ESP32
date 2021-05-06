@@ -15,7 +15,7 @@
 
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 26
-#define DST 27
+#define DST 34
 #define PH 35
 #define BUILTIN_LED 2
 
@@ -63,12 +63,15 @@ void setup(void)
 {
    
   MySerial.begin(9600, SERIAL_8N1, 16, 17);//(16接tx)（17接rx）
-  Serial.begin(9600); //Begin serial communication
+  
   adcAttachPin(PH);//将引脚连接到ADC
   adcStart(PH);//在连接的引脚总线上开始ADC转换
   adcAttachPin(DST);//将引脚连接到ADC
   adcStart(DST);//在连接的引脚总线上开始ADC转换
   analogReadResolution(16);//设置aliogRead返回值的分辨
+
+  Serial.begin(9600); //Begin serial communication
+  pinMode(DST,INPUT);
   setup_wifi();   //wifi 连接
   client.setServer(mqtt_server, 1883);  //服务器连接端口
   client.connect(device_id,device_name,device_password); // 服务器连接密码和用户名
@@ -87,7 +90,7 @@ void loop(void)
   // 获取传感器的参数
   sensors.requestTemperatures();  
   float temper = sensors.getTempCByIndex(0); // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire//Update value every 1 sec.
-  float tds = dstSe.readtds();
+  float tds = dstSe.readtds(temper);
   float ph = phSe.getPHvalue(temper);
 
 struct tm tinfo;
